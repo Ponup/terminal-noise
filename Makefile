@@ -1,8 +1,12 @@
+CC ?= gcc
+CFLAGS := $(CFLAGS) -D_POSIX_C_SOURCE -Wall -Wpedantic -ansi -std=c99
+PROGRAM = terminal-noise
 
-
+.PHONY: all
 all:
-	gcc -D_POSIX_C_SOURCE -Wall -Wpedantic -std=c11 -o terminal-noise main.c
+	$(CC) $(CFLAGS) -o $(PROGRAM) main.c
 
+.PHONY: clean
 clean:
-	rm -f terminal-noise
+	$(RM) $(PROGRAM) 
 
