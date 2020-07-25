@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,12 +22,12 @@ static void reset_terminal() {
     put_out("\033[?25h"); // show cursor
 }
 
-static int input_ready() {
+static bool input_ready() {
 	fd_set read_fds;
     FD_ZERO(&read_fds);
     FD_SET(STDIN_FILENO, &read_fds);
 
-    return select(1, &read_fds, NULL, NULL, &tv);
+    return select(1, &read_fds, NULL, NULL, &tv) == 1;
 }
 
 int main(int argc, char **argv) {
@@ -51,7 +52,7 @@ int main(int argc, char **argv) {
     custom_termsettings.c_lflag &= ~(ECHO | ICANON | ISIG);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &custom_termsettings);
 
-    int is_input_ready = 0;
+    bool is_input_ready = 0;
     int buffer_pos = 0;
     size_t num_terminal_chars = w.ws_row * w.ws_col;
     while(!is_input_ready) {
