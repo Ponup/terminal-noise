@@ -62,8 +62,8 @@ int main(int argc, char **argv) {
         for (int c = 0; c < num_terminal_chars; c++) {
 			buffer_pos += sprintf(screen_buffer + buffer_pos, "\x1b[48;5;%dm ", rand() % 256);
 		}
-		put_out("\033[0;0H");
-        put_out(screen_buffer);
+		write(STDOUT_FILENO, "\033[0;0H", 6);
+		write(STDOUT_FILENO, screen_buffer, buffer_pos);
 
         is_input_ready = input_ready();
         if(!is_input_ready) sleep(1);
