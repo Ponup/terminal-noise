@@ -1,14 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
-#include <unistd.h>
-#include <time.h>
-#include <string.h>
 #include <termios.h>
-#include <signal.h>
+#include <time.h>
+#include <unistd.h>
 
 #define put_out(x) fputs(x, stdout)
+
+static struct timeval tv = {
+	.tv_sec = 0L,
+	.tv_usec = 0L
+};
 
 static void reset_terminal() {
     put_out("\033[0m"); // reset background
@@ -16,15 +20,6 @@ static void reset_terminal() {
     put_out("\033[0;0H");
     put_out("\033[?25h"); // show cursor
 }
-
-static void catch_function(int signo) {
-    reset_terminal();
-}
-
-static struct timeval tv = {
-	.tv_sec = 0L,
-	.tv_usec = 0L
-};
 
 static int input_ready() {
 	fd_set read_fds;
@@ -43,10 +38,6 @@ int main(int argc, char **argv) {
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
-    struct sigaction act;
-    act.sa_handler = catch_function;
-    sigaction(SIGINT, &act, NULL);
-
     size_t buffer_size = sizeof(char) * 12 * w.ws_row * w.ws_col;
 
     char *screen_buffer = (char*)malloc(buffer_size);
@@ -57,7 +48,7 @@ int main(int argc, char **argv) {
     struct termios custom_termsettings, original_termsettings;
     tcgetattr(STDIN_FILENO, &custom_termsettings);
     original_termsettings = custom_termsettings;
-    custom_termsettings.c_lflag &= ~(ECHO | ICANON);
+    custom_termsettings.c_lflag &= ~(ECHO | ICANON | ISIG);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &custom_termsettings);
 
     int is_input_ready = 0;
