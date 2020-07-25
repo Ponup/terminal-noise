@@ -52,6 +52,8 @@ int main(int argc, char **argv) {
     custom_termsettings.c_lflag &= ~(ECHO | ICANON | ISIG);
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &custom_termsettings);
 
+    setvbuf(stdout, NULL, _IONBF, 0);
+
     bool is_input_ready = 0;
     int buffer_pos = 0;
     size_t num_terminal_chars = w.ws_row * w.ws_col;
