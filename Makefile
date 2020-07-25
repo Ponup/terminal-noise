@@ -1,5 +1,5 @@
 CC ?= gcc
-CFLAGS := $(CFLAGS) -D_POSIX_C_SOURCE -Wall -Wpedantic -ansi -std=c99
+CFLAGS := $(CFLAGS) -D_POSIX_C_SOURCE=200809L -Wall -Wpedantic -ansi -std=c99 -O2
 PROGRAM = terminal-noise
 
 .PHONY: all

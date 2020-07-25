@@ -36,10 +36,10 @@ int main(int argc, char **argv) {
 
     srand(t);
 
-    struct winsize w;
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
+    struct winsize term_size;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &term_size);
 
-    size_t buffer_size = sizeof(char) * 12 * w.ws_row * w.ws_col;
+    const size_t buffer_size = sizeof(char) * 12 * term_size.ws_row * term_size.ws_col;
 
     char *screen_buffer = (char*)malloc(buffer_size);
     memset(screen_buffer, '\0', buffer_size);
@@ -54,19 +54,26 @@ int main(int argc, char **argv) {
 
     setvbuf(stdout, NULL, _IONBF, 0);
 
-    bool is_input_ready = 0;
+    const struct timespec sleep_ts = {
+    	.tv_sec = 0,
+    	.tv_nsec = 50000000
+    };
+
+    bool is_input_ready = false;
     int buffer_pos = 0;
-    size_t num_terminal_chars = w.ws_row * w.ws_col;
+    const size_t num_terminal_chars = term_size.ws_row * term_size.ws_col;
     while(!is_input_ready) {
     	buffer_pos = 0;
-        for (int c = 0; c < num_terminal_chars; c++) {
+        for (size_t c = 0; c < num_terminal_chars; c++) {
 			buffer_pos += sprintf(screen_buffer + buffer_pos, "\x1b[48;5;%dm ", rand() % 256);
 		}
 		write(STDOUT_FILENO, "\033[0;0H", 6);
 		write(STDOUT_FILENO, screen_buffer, buffer_pos);
 
         is_input_ready = input_ready();
-        if(!is_input_ready) sleep(1);
+        if(!is_input_ready) {
+        	nanosleep(&sleep_ts, NULL);
+        }
     }
 
     free(screen_buffer);
