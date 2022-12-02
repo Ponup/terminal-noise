@@ -1,14 +1,14 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <sys/ioctl.h>
+#include <string.h>
 #include <sys/select.h>
 #include <termios.h>
 #include <time.h>
 #include <unistd.h>
 
-#define put_out(x) fputs(x, stdout)
+#define WRITE_OUT(x, y) write(STDOUT_FILENO, x, sizeof(char) * y)
 
 static struct timeval tv = {
 	.tv_sec = 0L,
@@ -16,10 +16,10 @@ static struct timeval tv = {
 };
 
 static void reset_terminal() {
-    put_out("\033[0m"); // reset background
-    put_out("\033[2J"); // clear screen
-    put_out("\033[0;0H");
-    put_out("\033[?25h"); // show cursor
+    WRITE_OUT("\033[0m", 4); // reset background
+    WRITE_OUT("\033[2J", 4); // clear screen
+    WRITE_OUT("\033[0;0H", 6);
+    WRITE_OUT("\033[?25h", 6); // show cursor
 }
 
 static bool input_ready() {
@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
     char *screen_buffer = (char*)malloc(buffer_size);
     memset(screen_buffer, '\0', buffer_size);
 
-    put_out("\033[?25l"); // hide cursor
+    WRITE_OUT("\033[?25l", 6); // hide cursor
 
     struct termios custom_termsettings, original_termsettings;
     tcgetattr(STDIN_FILENO, &custom_termsettings);
@@ -67,8 +67,8 @@ int main(int argc, char **argv) {
         for (size_t c = 0; c < num_terminal_chars; c++) {
 			buffer_pos += sprintf(screen_buffer + buffer_pos, "\x1b[48;5;%dm ", rand() % 256);
 		}
-		write(STDOUT_FILENO, "\033[0;0H", 6);
-		write(STDOUT_FILENO, screen_buffer, buffer_pos);
+		WRITE_OUT("\033[0;0H", 6);
+		WRITE_OUT(screen_buffer, buffer_pos);
 
         is_input_ready = input_ready();
         if(!is_input_ready) {

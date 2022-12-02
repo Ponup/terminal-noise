@@ -6,9 +6,9 @@ Just noise, in the terminal.
 
 ## Usage
 
-```sh
-$ make
-$ ./terminal-noise
+```shell
+make
+./terminal-noise
 ```
 
 Type any key to quit. Control+c is ignored.
