@@ -30,6 +30,12 @@ static bool input_ready() {
     return select(1, &read_fds, NULL, NULL, &tv) == 1;
 }
 
+const char *rand_number_char() {
+	static char number_buffer[5];
+	sprintf(number_buffer, "%u", rand() % 256);
+	return number_buffer;
+}
+
 int main(int argc, char **argv) {
     time_t t;
     time(&t);
@@ -60,15 +66,16 @@ int main(int argc, char **argv) {
     };
 
     bool is_input_ready = false;
-    int buffer_pos = 0;
     const size_t num_terminal_chars = term_size.ws_row * term_size.ws_col;
     while(!is_input_ready) {
-    	buffer_pos = 0;
+    	memset(screen_buffer, '\0', buffer_size);
+		strcat(screen_buffer, "\033[0;0H");
         for (size_t c = 0; c < num_terminal_chars; c++) {
-			buffer_pos += sprintf(screen_buffer + buffer_pos, "\x1b[48;5;%dm ", rand() % 256);
+    		strcat(screen_buffer, "\x1b[48;5;");
+    		strcat(screen_buffer, rand_number_char());
+    		strcat(screen_buffer, "m ");
 		}
-		WRITE_OUT("\033[0;0H", 6);
-		WRITE_OUT(screen_buffer, buffer_pos);
+		WRITE_OUT(screen_buffer, buffer_size);
 
         is_input_ready = input_ready();
         if(!is_input_ready) {
